@@ -59,7 +59,7 @@ function udeals_woocommerce_scripts() {
 
 	wp_add_inline_style( 'udeals-woocommerce-style', $inline_font );
 }
-add_action( 'wp_enqueue_scripts', 'udeals_woocommerce_scripts' );
+// add_action( 'wp_enqueue_scripts', 'udeals_woocommerce_scripts' );
 
 /**
  * Disable the default WooCommerce stylesheet.

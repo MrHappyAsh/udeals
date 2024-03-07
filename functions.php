@@ -186,3 +186,95 @@ if ( defined( 'JETPACK__VERSION' ) ) {
 if ( class_exists( 'WooCommerce' ) ) {
 	require get_template_directory() . '/inc/woocommerce.php';
 }
+
+/**
+ * Customize the title of WooCommerce products on the shop page or product archives.
+ *
+ * @param string $title The original title of the product.
+ * @param int $id The ID of the product.
+ * @return string The modified title of the product.
+ */
+add_filter( 'the_title', 'customize_woocommerce_product_title', 10, 2 );
+function customize_woocommerce_product_title( $title, $id ) {
+    // Only apply to WooCommerce products on the shop page or product archives
+    if ( is_shop() || is_product_category() || is_product_tag() && get_post_type( $id ) === 'product' ) {
+        if ( strlen( $title ) > 34 ) {
+            $title = substr( $title, 0, 34 ) . '...';
+        }
+    }
+    return $title;
+}
+
+/**
+ * Custom function to display WooCommerce star rating.
+ *
+ * This function outputs the star rating HTML for a product based on its average rating and review count.
+ *
+ * @global WC_Product $product The current product object.
+ */
+function custom_woocommerce_star_rating() {
+    global $product;
+    $average = $product->get_average_rating();
+    $review_count = $product->get_review_count();
+
+	// if ( $review_count > 0 ) {
+		// Output the rating HTML
+		echo '<div class="star-rating">';
+		for ($i = 1; $i <= 5; $i++) {
+			if ($average >= $i) {
+				echo '<span class="star filled">&#9733;</span>'; // Gold star
+			} else {
+				echo '<span class="star">&#9734;</span>'; // Grey star
+			}
+		}
+		echo '<span class="rating-count"> (' . $review_count . ')</span>';
+		echo '</div>';
+	// }
+}
+
+// Remove default WooCommerce rating from shop loop
+remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5);
+// Add custom rating to shop loop
+add_action('woocommerce_after_shop_loop_item_title', 'custom_woocommerce_star_rating', 5);
+
+// Remove default WooCommerce rating from product page
+remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10);
+// Add custom rating to product page
+add_action('woocommerce_single_product_summary', 'custom_woocommerce_star_rating', 10);
+
+add_filter('woocommerce_sale_flash', 'custom_variable_sale_flash', 10, 3);
+function custom_variable_sale_flash($html, $post, $product) {
+    // Check if the product is a variable product
+    if ($product->is_type('variable')) {
+        $max_discount = 0;
+
+        // Loop through all variations of the product
+        $variations = $product->get_available_variations();
+        foreach ($variations as $variation) {
+            $variation_obj = wc_get_product($variation['variation_id']);
+            if ($variation_obj->get_regular_price() && $variation_obj->get_sale_price()) {
+                $regular_price = (float) $variation_obj->get_regular_price();
+                $sale_price = (float) $variation_obj->get_sale_price();
+                $discount = (($regular_price - $sale_price) / $regular_price) * 100;
+                if ($discount > $max_discount) {
+                    $max_discount = $discount;
+                }
+            }
+        }
+
+        // If there's at least one variation on sale, show the "UPTO X% OFF" badge
+        if ($max_discount > 0) {
+            $max_discount_rounded = round($max_discount, 0);
+            return '<span class="onsale">UPTO ' . $max_discount_rounded . '% OFF</span>';
+        }
+    }
+    // For non-variable products or if no variations are on sale, return the default sale flash HTML
+    else if ($product->get_regular_price() && $product->get_sale_price()) {
+        $regular_price = (float) $product->get_regular_price();
+        $sale_price = (float) $product->get_sale_price();
+        $percentage = round(((($regular_price - $sale_price) / $regular_price) * 100), 0);
+        return '<span class="onsale">' . $percentage . '% OFF</span>';
+    }
+
+    return $html;
+}
