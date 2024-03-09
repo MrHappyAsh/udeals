@@ -9,6 +9,9 @@
  * @package UDeals
  */
 
+// Calculate the cart quantity
+$cart_qty = WC()->cart->get_cart_contents_count();
+
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -26,7 +29,7 @@
 	<a class="skip-link screen-reader-text" href="#primary"><?php esc_html_e( 'Skip to content', 'udeals' ); ?></a>
 
 	<header id="masthead" class="site-header">
-		<div class="content-width flex-row justify-space-between">
+		<div class="content-width flex-row">
 			<div class="site-branding">
 				<?php
 				the_custom_logo();
@@ -57,13 +60,38 @@
 				);
 				?>
 			</nav><!-- #site-navigation -->
+
+			<span class="pipe_seperator">&nbsp;</span>
+
+			<div class="header_icon_row">
+				<div class="header_icon_block">
+					<a href="<?php echo get_permalink( wc_get_page_id( 'myaccount' ) ); ?>/kit-list/">
+						<img class="header_block_icon" src="<?php echo get_stylesheet_directory_uri(); ?>/img/icons/kit-list-white.svg" alt="Kit List"/>
+					</a>
+				</div>
+				<div class="header_icon_block">
+					<a href="<?php echo get_permalink( wc_get_page_id( 'myaccount' ) ); ?>">
+						<img class="header_block_icon" src="<?php echo get_stylesheet_directory_uri(); ?>/img/icons/profile-white.svg" alt="My Account"/>
+					</a>
+				</div>
+				<div class="header_icon_block">
+					<a href="<?php echo wc_get_cart_url(); ?>">
+						<img class="header_block_icon" src="<?php echo get_stylesheet_directory_uri(); ?>/img/icons/basket-white.svg" alt="Shopping cart" />
+						<?php if ( $cart_qty > 0 ) {  ?>
+							<span class="cart_count">
+								<?php echo $cart_qty; ?>
+							</span>
+						<?php } ?>
+					</a>
+				</div>
+			</div>
+			
 		</div>
 		<div id="top_bar">
 			<ul class="top_bar_items">
-				<li><a href="#">⚡ Flash Sales</a></li>
-				<li><a href="#">☀️ Sizzling Summer Deals</a></li>
-				<li><a href="#">🚚 Free UK Delivery</a></li>
-				<li><a href="#">😲 Join today, earn UPoints and level up!</a></li>
+				<li><a href="#">Flash Sales</a></li>
+				<li><a href="#">Join today, earn UPoints and level up!</a></li>
+				<li><a href="#">Sizzling Summer Deals</a></li>
 			</ul>
 		</div>
 	</header><!-- #masthead -->

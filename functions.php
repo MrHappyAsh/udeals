@@ -278,3 +278,30 @@ function custom_variable_sale_flash($html, $post, $product) {
 
     return $html;
 }
+
+/**
+ * Removes the page title on the WooCommerce shop page.
+ *
+ * @param string $title The current page title.
+ * @return string|bool The modified page title or false if it's the shop page.
+ */
+add_filter( 'woocommerce_show_page_title' , 'custom_remove_shop_page_title' );
+function custom_remove_shop_page_title( $title ) {
+	if ( is_shop() ) {
+		return false;
+	}
+	return $title;
+}
+
+/**
+ * Adds custom images above the WooCommerce shop loop.
+ */
+function custom_images_before_shop_loop() {
+	// Your image HTML here. For example:
+	echo '<div class="shop-images-above-loop">';
+		echo '<img src="' . get_template_directory_uri() . '/img/shop/pizza-oven.jpg" alt="Pizza Oven">';
+		echo '<img src="' . get_template_directory_uri() . '/img/shop/health-fitness.jpg" alt="Health and Fitness">';
+		echo '<img src="' . get_template_directory_uri() . '/img/shop/travel.jpg" alt="Travel">';
+	echo '</div>';
+}
+add_action( 'woocommerce_before_shop_loop', 'custom_images_before_shop_loop' );

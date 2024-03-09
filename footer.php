@@ -30,7 +30,7 @@
 				<h6 class="menu-header">Let's Get Social</h6>
 				<ul class="footer-menu">
 					<li class="menu-item"><a href="https://www.facebook.com/">Facebook</a></li>
-					<li class="menu-item"><a href="https://www.twitter.com/">Twitter</a></li>
+					<li class="menu-item"><a href="https://www.pinterest.com/">Pinterest</a></li>
 					<li class="menu-item"><a href="https://www.instagram.com/">Instagram</a></li>
 					<li class="menu-item"><a href="https://www.tiktok.com/">TikTok</a></li>
 				</ul>
