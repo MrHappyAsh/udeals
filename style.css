@@ -686,15 +686,16 @@ textarea {
 	position: fixed;
 	left: 0;
 	right: 0;
-	top: 142px;
+	top: auto;
 	border: 1px solid;
 	width: 100vw;
+	background-color: #fff;
 }
 
-body.admin-bar .main-navigation ul li:hover > ul,
+/* body.admin-bar .main-navigation ul li:hover > ul,
 body.admin-bar .main-navigation ul li.focus > ul {
     top: 174px;
-}
+} */
 
 .main-navigation li {
 	position: relative;
@@ -1041,9 +1042,98 @@ textarea {
 .menu-header {
 	font-size: 1rem;
 	font-weight: 700;
-	text-align: left;
 	text-transform: uppercase;
 	margin: 0 0 15px 0;
+}
+
+li.shop_sub_menu ul.sub-menu {
+	min-height: 200px;
+	background-color: #fff;
+}
+
+.main-navigation ul li.child-list-open,
+.main-navigation ul li.child-list-open:hover {
+	margin: 0;
+}
+
+.main-navigation ul li.child-list-open:hover ul,
+.main-navigation ul li.child-list-open ul {
+	display: flex;
+	flex-direction: column;
+	background-color: #fff;
+	left: auto;
+	right: auto;
+	top: auto;
+	width: auto;
+	border: none;
+	min-height: unset;
+	box-shadow: none;
+}
+
+.main-navigation ul li.child-list-open ul li {
+	margin: 0;
+}
+
+.main-navigation ul li.child-list-open ul a {
+	min-width: 100%;
+}
+
+.nav-menu li.menu-item.large_menu_item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+	margin: 0;
+}
+
+.nav-menu li.menu-item.large_menu_item a {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: flex-start;
+	font-weight: 700;
+	text-transform: uppercase;
+	color: #fff;
+	text-decoration: none;
+	padding: 5px;
+}
+
+.shop_menu_cat_1 {
+	background-image: url('img/menu/pizza-oven.jpg');
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.shop_menu_cat_2 {
+	background-image: url('img/menu/work-out.jpg');
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.shop_menu_cat_3 {
+	background-image: url('img/menu/travel.jpg');
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.shop_menu_shop_all {
+	flex: 1;
+	margin: 0 !important;
+}
+
+.shop_menu_shop_all a {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 100% !important;
+	background-color: var(--sale-color);
+	color: #fff;
+	font-weight: 600;
 }
 
 /* Header */
