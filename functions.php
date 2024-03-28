@@ -50,6 +50,7 @@ function udeals_setup() {
 	register_nav_menus(
 		array(
 			'menu-1' => esc_html__( 'Primary', 'udeals' ),
+			'top-bar-menu' => esc_html__( 'Top Bar Menu', 'udeals' ),
 			'footer-1' => esc_html__( 'Footer Menu 1', 'udeals' ),
 			'footer-2' => esc_html__( 'Footer Menu 2', 'udeals' ),
 			'footer-3' => esc_html__( 'Footer Menu 3', 'udeals' ),
@@ -147,6 +148,8 @@ function udeals_scripts() {
 
 	wp_enqueue_script( 'udeals-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 
+	wp_enqueue_script( 'udeals_js', get_template_directory_uri() . '/js/udeals.js', array(), _S_VERSION, true );
+
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
@@ -217,20 +220,50 @@ function custom_woocommerce_star_rating() {
     $average = $product->get_average_rating();
     $review_count = $product->get_review_count();
 
-	// if ( $review_count > 0 ) {
-		// Output the rating HTML
-		echo '<div class="star-rating">';
+    // Output the rating HTML
+    echo '<div class="star-rating">';
+		if($average > 0) {
+			echo '<span class="avg-rating">' . $average . '</span>';
+		}
 		for ($i = 1; $i <= 5; $i++) {
 			if ($average >= $i) {
 				echo '<span class="star filled">&#9733;</span>'; // Gold star
+			} elseif ($average > $i - 1) {
+				// Display half-star if average is between star values
+				echo '<span class="star half-filled">&#9733;</span>'; // Adjust as needed for half-stars
 			} else {
 				echo '<span class="star">&#9734;</span>'; // Grey star
 			}
 		}
-		echo '<span class="rating-count"> (' . $review_count . ')</span>';
-		echo '</div>';
-	// }
+		// Modify this line to include the average rating
+		if ($review_count > 0) {
+			echo '<span class="rating-count">' . $review_count . ' ratings</span>';
+		}
+    echo '</div>';
 }
+
+function custom_woocommerce_get_rating_html($rating_html, $rating, $count) {
+    if ( $rating > 0 ) {
+        // Start building the rating HTML
+        $html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
+        $html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">';
+        for ($i = 1; $i <= 5; $i++) {
+            if ($rating >= $i) {
+                $html .= '<span class="star filled">&#9733;</span>'; // Gold star
+            } elseif ($rating > $i - 1) {
+                $html .= '<span class="star half-filled">&#9733;</span>'; // For half stars, if needed
+            } else {
+                $html .= '<span class="star">&#9733;</span>'; // Grey star
+            }
+        }
+        $html .= '</span></div>';
+
+        return $html;
+    }
+
+    return ''; // Return empty string if no rating
+}
+add_filter('woocommerce_product_get_rating_html', 'custom_woocommerce_get_rating_html', 10, 3);
 
 // Remove default WooCommerce rating from shop loop
 remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5);
@@ -287,21 +320,37 @@ function custom_variable_sale_flash($html, $post, $product) {
  */
 add_filter( 'woocommerce_show_page_title' , 'custom_remove_shop_page_title' );
 function custom_remove_shop_page_title( $title ) {
-	if ( is_shop() ) {
+	if ( is_shop() || is_front_page() ) {
 		return false;
 	}
 	return $title;
 }
 
 /**
- * Adds custom images above the WooCommerce shop loop.
+ * Removes avatars from WooCommerce product reviews.
+ *
+ * This function is used as a filter for the 'get_avatar' hook. It checks if the current context is a WooCommerce product review and removes the avatar if it is. Otherwise, it returns the original avatar.
+ *
+ * @param string $avatar The HTML markup for the avatar.
+ * @param mixed $id_or_email The user ID or email address.
+ * @param int $size The avatar size in pixels.
+ * @param string $default The default avatar URL.
+ * @param string $alt The alternative text for the avatar.
+ * @return string|null The modified avatar HTML markup or null if the avatar should be removed.
  */
-function custom_images_before_shop_loop() {
-	// Your image HTML here. For example:
-	echo '<div class="shop-images-above-loop">';
-		echo '<img src="' . get_template_directory_uri() . '/img/shop/pizza-oven.jpg" alt="Pizza Oven">';
-		echo '<img src="' . get_template_directory_uri() . '/img/shop/health-fitness.jpg" alt="Health and Fitness">';
-		echo '<img src="' . get_template_directory_uri() . '/img/shop/travel.jpg" alt="Travel">';
-	echo '</div>';
+add_filter('get_avatar', 'remove_review_avatars', 10, 5);
+function remove_review_avatars($avatar, $id_or_email, $size, $default, $alt) {
+    // Check if we're inside the WooCommerce product review context
+    if (is_singular('product') && in_the_loop() && is_main_query()) {
+        return null; // Return null to remove the avatar
+    }
+
+    return $avatar; // Return the original avatar in other contexts
 }
-add_action( 'woocommerce_before_shop_loop', 'custom_images_before_shop_loop' );
+
+// add_filter( 'woocommerce_output_related_products_args', 'custom_related_products_args', 20 );
+// function custom_related_products_args( $args ) {
+//     $args['posts_per_page'] = 4; // Number of related products
+//     $args['columns'] = 4; // Number of columns
+//     return $args;
+// }

@@ -50,7 +50,11 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 			</div><!-- .site-branding -->
 
 			<nav id="site-navigation" class="main-navigation">
-				<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( 'Primary Menu', 'udeals' ); ?></button>
+			<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+				<span class="bar1"></span>
+				<span class="bar2"></span>
+				<span class="bar3"></span>
+			</button>
 				<?php
 				wp_nav_menu(
 					array(
@@ -88,11 +92,38 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 			
 		</div>
 		<div id="top_bar">
-			<ul class="top_bar_items">
-				<li><a href="#">Flash Sales</a></li>
-				<li><a href="#">Join today, earn UPoints and level up!</a></li>
-				<li><a href="#">Sizzling Summer Deals</a></li>
-			</ul>
+			<?php
+				wp_nav_menu(
+					array(
+						'theme_location' => 'top-bar-menu',
+						'container_class' => 'top_bar_items', // Add the class 'top_bar_items'
+					)
+				);
+				?>
 		</div>
 	</header><!-- #masthead -->
 
+	<div class="main-content">
+
+		<?php if ( is_front_page() ) : // Check if current page is the homepage ?>
+			<div class="shop-main-cat-banner">
+				<div>
+					<a href="">
+						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/gadgets.jpg" alt="Shop gadgets">
+						<span class="button-default light-button" role="button">Gadgets</span>
+					</a>
+				</div>
+				<div>
+					<a href="">
+						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/home.jpg" alt="Shop home">
+						<span class="button-default light-button" role="button">Home</span>
+					</a>
+				</div>
+				<div>
+					<a href="">
+						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/garden.jpg" alt="Shop garden">
+						<span class="button-default light-button" role="button">Garden</span>
+					</a>
+				</div>
+			</div>
+		<?php endif; ?>
