@@ -147,9 +147,7 @@ function udeals_scripts() {
 	wp_style_add_data( 'udeals-style', 'rtl', 'replace' );
 
 	wp_enqueue_script( 'udeals-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
-
 	wp_enqueue_script( 'udeals_js', get_template_directory_uri() . '/js/udeals.js', array(), _S_VERSION, true );
-
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
@@ -222,22 +220,26 @@ function custom_woocommerce_star_rating() {
 
     // Output the rating HTML
     echo '<div class="star-rating">';
-		if($average > 0) {
-			echo '<span class="avg-rating">' . $average . '</span>';
-		}
-		for ($i = 1; $i <= 5; $i++) {
-			if ($average >= $i) {
-				echo '<span class="star filled">&#9733;</span>'; // Gold star
-			} elseif ($average > $i - 1) {
-				// Display half-star if average is between star values
-				echo '<span class="star half-filled">&#9733;</span>'; // Adjust as needed for half-stars
-			} else {
-				echo '<span class="star">&#9734;</span>'; // Grey star
-			}
-		}
-		// Modify this line to include the average rating
 		if ($review_count > 0) {
-			echo '<span class="rating-count">' . $review_count . ' ratings</span>';
+			if($average > 0) {
+				echo '<span class="avg-rating">' . $average . '</span>';
+			}
+			for ($i = 1; $i <= 5; $i++) {
+				if ($average >= $i) {
+					// echo '<span class="star filled">&#9733;</span>';'img/icons/FullStar_36px-Gold.svg'
+					echo '<img src="' . get_template_directory_uri() . '/img/icons/FullStar_36px-Gold.svg" alt="star-filled" class="star filled">';
+				} elseif ($average > $i - 1) {
+					// Display half-star if average is between star values
+					// echo '<span class="star half-filled">&#9733;</span>';
+					echo '<img src="' . get_template_directory_uri() . '/img/icons/HalfStar_36px-Gold.svg" alt="star-filled" class="star filled">';
+				} else {
+					// echo '<span class="star">&#9734;</span>'; 
+					echo '<img src="' . get_template_directory_uri() . '/img/icons/Star_36px-Gold.svg" alt="star-filled" class="star filled">';
+				}
+			}
+			// Modify this line to include the average rating
+			
+				echo '<span class="rating-count">' . $review_count . ' ratings</span>';
 		}
     echo '</div>';
 }
@@ -272,8 +274,6 @@ add_action('woocommerce_after_shop_loop_item_title', 'custom_woocommerce_star_ra
 
 // Remove default WooCommerce rating from product page
 remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10);
-// Add custom rating to product page
-add_action('woocommerce_single_product_summary', 'custom_woocommerce_star_rating', 10);
 
 add_filter('woocommerce_sale_flash', 'custom_variable_sale_flash', 10, 3);
 function custom_variable_sale_flash($html, $post, $product) {
@@ -348,9 +348,151 @@ function remove_review_avatars($avatar, $id_or_email, $size, $default, $alt) {
     return $avatar; // Return the original avatar in other contexts
 }
 
-// add_filter( 'woocommerce_output_related_products_args', 'custom_related_products_args', 20 );
-// function custom_related_products_args( $args ) {
-//     $args['posts_per_page'] = 4; // Number of related products
-//     $args['columns'] = 4; // Number of columns
-//     return $args;
-// }
+add_filter( 'woocommerce_output_related_products_args', 'custom_related_products_args', 20 );
+function custom_related_products_args( $args ) {
+    $args['posts_per_page'] = 4; // Number of related products
+    $args['columns'] = 4; // Number of columns
+    return $args;
+}
+
+/**
+ * Modifies the text displayed on the "Thank You" page after a successful order in WooCommerce.
+ *
+ * @param string $text The default text displayed on the "Thank You" page.
+ * @param WC_Order $order The WooCommerce order object.
+ * @return string The modified text to be displayed on the "Thank You" page.
+ */
+add_filter('woocommerce_thankyou_order_received_text', 'custom_thankyou_order_received_text', 10, 2);
+function custom_thankyou_order_received_text($text, $order) {
+	return 'We are going to process your order right away. You will receive an email confirmation with the order details and your shipping information. Thank you for shopping with UDeals!';
+}
+
+/**
+ * Outputs the custom product summary.
+ */
+function custom_output_product_summary() {
+	if (is_product()) {
+		echo '<div class="summary_block">';
+			echo '<div class="summary_block_inners">';
+
+				// Output the title of the product.
+				woocommerce_template_single_title(); // Product Title
+
+				// Display the product rating, such as star ratings from customer reviews.
+				custom_woocommerce_star_rating(); // Rating
+
+				// Display the product price.
+				woocommerce_template_single_price(); // Price
+
+				// Show the product excerpt or description.
+				woocommerce_template_single_excerpt(); // Excerpt or Description
+
+				// Add to Cart button.
+				woocommerce_template_single_add_to_cart(); // Add to Cart button
+
+				// Display meta information like categories and tags.
+				woocommerce_template_single_meta(); // Meta information
+
+				// Social sharing buttons.
+				woocommerce_template_single_sharing(); // Sharing buttons
+
+			echo '</div>';
+		echo '</div>';
+	}
+}
+
+/**
+ * Removes specific actions from the WooCommerce single product summary.
+ *
+ * This function removes various actions from the WooCommerce single product summary, such as the product title,
+ * rating, price, excerpt, add to cart button, meta information, and sharing buttons.
+ *
+ * @since 1.0.0
+ */
+function custom_remove_product_summary() {
+	remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_title', 5);
+	remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10);
+	remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
+	remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
+	remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
+	remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
+	remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_sharing', 50);
+}
+add_action('init', 'custom_remove_product_summary');
+
+/**
+ * Adds a custom summary after the main content in WooCommerce.
+ *
+ * This function hooks into the 'woocommerce_after_main_content' action and calls the 'custom_output_product_summary' function with a priority of 20.
+ *
+ * @since 1.0.0
+ */
+function custom_add_summary_after_main_content() {
+	add_action('woocommerce_after_main_content', 'custom_output_product_summary', 20);
+}
+add_action('init', 'custom_add_summary_after_main_content');
+
+/**
+ * Adds a custom buy now bar after the single product in WooCommerce.
+ *
+ * This function adds a custom buy now bar below the single product in WooCommerce. It displays the price and title of the product, and includes a "Buy Now" button that triggers a scroll to the product summary section.
+ *
+ * @global WP_Product $product The current product object.
+ *
+ * @return void
+ */
+function add_custom_buy_now_bar() {
+    global $product;
+
+	$regular_price = floatval( $product->get_regular_price() );
+	$sale_price = floatval( $product->get_sale_price() );
+	$savings = $regular_price - $sale_price;
+	$savings_text = '';
+
+	if ( $product->is_on_sale() && $savings > 0 ) {
+		$savings_text = '<span class="st-small-btn red-btn-bg savings-text">Save £' . number_format( $savings, 2 ) . '</span>';
+	}
+    ?>
+    <div id="custom-buy-now-bar" class="custom-buy-now-bar" style="display:none;">
+        <div class="buy-now-content">
+            <span class="price"><?php echo $product->get_price_html(); ?></span>
+			<?php echo $savings_text; ?>
+            <button onclick="scrollToSummary()">Buy Now</button>
+        </div>
+    </div>
+    <?php
+}
+add_action('woocommerce_after_single_product', 'add_custom_buy_now_bar');
+
+add_filter('wc_product_sku_enabled', '__return_false');
+
+/**
+ * Adds a custom product label to WooCommerce products published within the last 6 months.
+ *
+ * This function checks the publish date of the product and compares it with the current date.
+ * If the product was published within the last 6 months, it adds a "New Product" label to the product.
+ *
+ * @global WP_Post $product The current product object.
+ *
+ * @return void
+ */
+function add_custom_product_labels() {
+    global $product;
+
+    // Get the product's publish date
+    $post_date = get_the_date('Y-m-d', $product->get_id());
+    $post_date_timestamp = strtotime($post_date);
+    $current_timestamp = time();
+
+    // Calculate the difference in seconds
+    $time_difference = $current_timestamp - $post_date_timestamp;
+
+    // Six months in seconds (approximately 6 * 30 * 24 * 60 * 60)
+    $six_months_in_seconds = 6 * 30 * 24 * 60 * 60;
+
+    // Check if the product was published within the last 6 months
+    if ($time_difference <= $six_months_in_seconds) {
+        echo '<span class="new-product-label">New</span>';
+    }
+}
+add_action('woocommerce_before_shop_loop_item_title', 'add_custom_product_labels');

@@ -60,6 +60,7 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 					array(
 						'theme_location' => 'menu-1',
 						'menu_id'        => 'primary-menu',
+						'container_id'   => 'primary-menu-container',
 					)
 				);
 				?>
@@ -99,7 +100,7 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 						'container_class' => 'top_bar_items', // Add the class 'top_bar_items'
 					)
 				);
-				?>
+			?>
 		</div>
 	</header><!-- #masthead -->
 

@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 get_header( 'shop' ); ?>
 
 	<div class="product-page content-width">
-
+		
 		<?php
 			/**
 			 * woocommerce_before_main_content hook.
