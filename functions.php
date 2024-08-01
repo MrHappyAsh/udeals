@@ -189,6 +189,17 @@ if ( class_exists( 'WooCommerce' ) ) {
 }
 
 /**
+ * Adds WooCommerce support to the theme.
+ *
+ * This function adds support for WooCommerce to the current theme by using the `add_theme_support` function.
+ * It is hooked to the `after_setup_theme` action, which ensures that WooCommerce support is added after the theme is setup.
+ */
+function udeals_add_woocommerce_support() {
+	add_theme_support( 'woocommerce' );
+}
+add_action( 'after_setup_theme', 'udeals_add_woocommerce_support' );
+
+/**
  * Customize the title of WooCommerce products on the shop page or product archives.
  *
  * @param string $title The original title of the product.
@@ -198,9 +209,9 @@ if ( class_exists( 'WooCommerce' ) ) {
 add_filter( 'the_title', 'customize_woocommerce_product_title', 10, 2 );
 function customize_woocommerce_product_title( $title, $id ) {
     // Only apply to WooCommerce products on the shop page or product archives
-    if ( is_shop() || is_product_category() || is_product_tag() && get_post_type( $id ) === 'product' ) {
-        if ( strlen( $title ) > 34 ) {
-            $title = substr( $title, 0, 34 ) . '...';
+    if ( ( is_shop() || is_product_category() || is_product_tag() ) && get_post_type( $id ) === 'product' ) {
+        if ( strlen( $title ) > 50 ) {
+            $title = substr( $title, 0, 50 ) . '...';
         }
     }
     return $title;
@@ -372,7 +383,7 @@ function custom_thankyou_order_received_text($text, $order) {
  */
 function custom_output_product_summary() {
 	if (is_product()) {
-		echo '<div class="summary_block">';
+		echo '<div class="summary_block summary_block--desktop">';
 			echo '<div class="summary_block_inners">';
 
 				// Output the title of the product.
@@ -387,11 +398,17 @@ function custom_output_product_summary() {
 				// Show the product excerpt or description.
 				woocommerce_template_single_excerpt(); // Excerpt or Description
 
+				echo '<div class="custom_product_labels">';
+					echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/delivery.svg" alt="Free Delivery" /> Fast & Free Shipping</div>';
+					echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/safe.svg" alt="Safe payments" /> Safe & Secure Payment</div>';
+					echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/guarantee.svg" alt="Money back Guarantee" /> Money Back Guarantee</div>';
+				echo "</div>";	
+
 				// Add to Cart button.
 				woocommerce_template_single_add_to_cart(); // Add to Cart button
 
 				// Display meta information like categories and tags.
-				woocommerce_template_single_meta(); // Meta information
+				//woocommerce_template_single_meta(); // Meta information
 
 				// Social sharing buttons.
 				woocommerce_template_single_sharing(); // Sharing buttons
@@ -399,6 +416,31 @@ function custom_output_product_summary() {
 			echo '</div>';
 		echo '</div>';
 	}
+}
+
+/**
+ * Outputs the custom product summary for mobile devices.
+ */
+function custom_output_product_summary_mobile() {
+	echo '<div class="summary_block--mobile">';
+		echo '<div class="summary_block_mobile">';
+
+			woocommerce_template_single_title(); // Product Title
+			custom_woocommerce_star_rating(); // Rating
+			woocommerce_template_single_price(); // Price
+			woocommerce_template_single_excerpt(); // Excerpt or Description
+
+			echo '<div class="custom_product_labels">';
+				echo '<div class="custom_product_label"><img src="' . esc_url( get_stylesheet_directory_uri() . '/img/icons/delivery.svg' ) . '" alt="Free Delivery" /> Fast & Free Shipping</div>';
+				echo '<div class="custom_product_label"><img src="' . esc_url( get_stylesheet_directory_uri() . '/img/icons/hot.svg' ) . '" alt="Selling fast" /> Selling Fast, Last Few Remaining</div>';
+				echo '<div class="custom_product_label"><img src="' . esc_url( get_stylesheet_directory_uri() . '/img/icons/safe.svg' ) . '" alt="Safe payments" /> Safe & Secure Payment</div>';
+			echo '</div>';
+
+			woocommerce_template_single_add_to_cart(); // Add to Cart button
+			woocommerce_template_single_sharing(); // Sharing buttons
+
+		echo '</div>';
+	echo '</div>';
 }
 
 /**
@@ -431,6 +473,14 @@ function custom_add_summary_after_main_content() {
 	add_action('woocommerce_after_main_content', 'custom_output_product_summary', 20);
 }
 add_action('init', 'custom_add_summary_after_main_content');
+
+/**
+ * Adds a custom summary after the product gallery in WooCommerce for mobile devices.
+ */
+function custom_add_summary_after_product_gallery() {
+	add_action('woocommerce_after_single_product_summary', 'custom_output_product_summary_mobile', 5);
+}
+add_action('init', 'custom_add_summary_after_product_gallery');
 
 /**
  * Adds a custom buy now bar after the single product in WooCommerce.

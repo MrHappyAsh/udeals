@@ -118,7 +118,7 @@ if ( ! function_exists( 'udeals_woocommerce_wrapper_before' ) ) {
 	 */
 	function udeals_woocommerce_wrapper_before() {
 		?>
-			<main id="primary" class="site-main">
+			<main id="primary" class="site-main content-width">
 		<?php
 	}
 }

@@ -22,6 +22,7 @@ function adjustLayout() {
 
     const adminBarHeight = adminBar ? adminBar.offsetHeight : 0;
 
+    header.style.top = `${adminBarHeight}px`;
     menuContainer.style.top = `${header.offsetHeight + adminBarHeight}px`;
 }
 
@@ -52,14 +53,15 @@ function handleScroll() {
     const adminBarHeight = adminBar ? adminBar.offsetHeight : 0;
     const headerHeight = header ? header.offsetHeight : 0;
 
-    const offsetTop = summaryBlock.offsetTop + headerHeight + adminBarHeight;
+    const offsetTop = summaryBlock.getBoundingClientRect().top + window.scrollY - headerHeight - adminBarHeight;
+    const summaryBlockHeight = summaryBlock.getBoundingClientRect().height;
     const innerHeight = summaryBlockInners.getBoundingClientRect().height;
-    let maxTopPosition = window.scrollY + summaryBlock.getBoundingClientRect().top + summaryBlock.getBoundingClientRect().height - innerHeight - headerHeight - adminBarHeight;
+    const maxScrollY = offsetTop + summaryBlockHeight - innerHeight;
 
-    if (window.scrollY + headerHeight + adminBarHeight > offsetTop) {
-        if (window.scrollY + innerHeight + headerHeight + adminBarHeight > maxTopPosition) {
+    if (window.scrollY > offsetTop) {
+        if (window.scrollY > maxScrollY) {
             summaryBlockInners.style.position = 'absolute';
-            summaryBlockInners.style.top = (summaryBlock.getBoundingClientRect().height - innerHeight) + 'px';
+            summaryBlockInners.style.top = `${summaryBlockHeight - innerHeight}px`;
         } else {
             summaryBlockInners.style.position = 'fixed';
             summaryBlockInners.style.top = `${headerHeight + adminBarHeight}px`;
@@ -95,9 +97,21 @@ function toggleMenu() {
 }
 
 function scrollToSummary() {
-    const summaryBlock = document.querySelector('.summary_block');
+    const summaryBlock = document.querySelector('.summary_block--mobile');
     if (summaryBlock) {
         summaryBlock.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function addCountyValidation() {
+    var countyField = document.querySelector('#shipping-state');
+    if (countyField) {
+        countyField.setAttribute('required', 'required');
+        countyField.ariaLabel = 'County';
+        var label = document.querySelector('label[for=shipping-state]');
+        if (label) {
+            label.textContent = label.textContent.replace(' (optional)', '');
+        }
     }
 }
 
@@ -106,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     adjustLayout();
     setFixedWidth();
     handleScroll();
+    setTimeout(addCountyValidation, 2500);
 });
 
 window.addEventListener('resize', debounce(() => {
@@ -114,3 +129,7 @@ window.addEventListener('resize', debounce(() => {
 }, 250));
 
 window.addEventListener('scroll', handleScroll);
+
+document.body.addEventListener('updated_checkout', function() {
+    addCountyValidation();
+});

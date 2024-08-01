@@ -109,19 +109,19 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 		<?php if ( is_front_page() ) : // Check if current page is the homepage ?>
 			<div class="shop-main-cat-banner">
 				<div>
-					<a href="">
+					<a href="<?php echo site_url(); ?>/product-category/electronics/">
 						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/gadgets.jpg" alt="Shop gadgets">
-						<span class="button-default light-button" role="button">Gadgets</span>
+						<span class="button-default light-button" role="button">Electronics</span>
 					</a>
 				</div>
 				<div>
-					<a href="">
+					<a href="<?php echo site_url(); ?>/product-category/homeware/">
 						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/home.jpg" alt="Shop home">
 						<span class="button-default light-button" role="button">Home</span>
 					</a>
 				</div>
 				<div>
-					<a href="">
+					<a href="<?php echo site_url(); ?>/product-category/garden/">
 						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/garden.jpg" alt="Shop garden">
 						<span class="button-default light-button" role="button">Garden</span>
 					</a>

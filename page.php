@@ -12,8 +12,6 @@
  * @package UDeals
  */
 
-//  Template Name: Home Page
-
 get_header();
 ?>
 

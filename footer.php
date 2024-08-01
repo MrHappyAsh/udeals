@@ -29,11 +29,10 @@
 			</div>
 			<div class="footer-menu">
 				<h6 class="menu-header">Let's Get Social</h6>
-				<ul class="footer-menu">
-					<li class="menu-item"><a href="https://www.facebook.com/">Facebook</a></li>
-					<li class="menu-item"><a href="https://www.pinterest.com/">Pinterest</a></li>
-					<li class="menu-item"><a href="https://www.instagram.com/">Instagram</a></li>
-					<li class="menu-item"><a href="https://www.tiktok.com/">TikTok</a></li>
+				<ul class="footer-menu social-media">
+					<li class="menu-item"><a href="https://www.facebook.com/profile.php?id=61556134229439" target="_blank"><img src="<?php echo get_stylesheet_directory_uri(); ?>/img/icons/facebook.svg" alt="UDeals on Facebook"></a></li>
+					<li class="menu-item"><a href="https://www.instagram.com/udeals_uk/" target="_blank"><img src="<?php echo get_stylesheet_directory_uri(); ?>/img/icons/instagram.svg" alt="UDeals on Instagram"></a></a></li>
+					<li class="menu-item"><a href="https://www.tiktok.com/@udeals_uk" target="_blank"><img src="<?php echo get_stylesheet_directory_uri(); ?>/img/icons/tiktok.svg" alt="UDeals on TikTok"></a></a></li>
 				</ul>
 			</div>
 		</div>
