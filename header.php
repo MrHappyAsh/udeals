@@ -19,7 +19,7 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
-
+	<script>!function(s,a,e,v,n,t,z){if(s.saq)return;n=s.saq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!s._saq)s._saq=n;n.push=n;n.loaded=!0;n.version='1.0';n.queue=[];t=a.createElement(e);t.async=!0;t.src=v;z=a.getElementsByTagName(e)[0];z.parentNode.insertBefore(t,z)}(window,document,'script','https://tags.srv.stackadapt.com/events.js');saq('ts', 'h3q_v_B6Vf-LMIsFg8akKg');</script>
 	<?php wp_head(); ?>
 </head>
 
@@ -32,7 +32,8 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 		<div class="content-width flex-row">
 			<div class="site-branding">
 				<?php
-				the_custom_logo();
+				// the_custom_logo();
+				echo '<a href="' . site_url() . '"><img src="' . get_stylesheet_directory_uri() . '/img/logo/udeals-white-logo.svg" alt="UDeals" class="custom-logo" /></a>';
 				if ( is_front_page() && is_home() ) :
 					?>
 					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
@@ -93,38 +94,17 @@ $cart_qty = WC()->cart->get_cart_contents_count();
 			
 		</div>
 		<div id="top_bar">
-			<?php
-				wp_nav_menu(
-					array(
-						'theme_location' => 'top-bar-menu',
-						'container_class' => 'top_bar_items', // Add the class 'top_bar_items'
-					)
-				);
-			?>
+			<div class="content-width">
+				<?php
+					wp_nav_menu(
+						array(
+							'theme_location' => 'top-bar-menu',
+							'container_class' => 'top_bar_items', // Add the class 'top_bar_items'
+						)
+					);
+				?>
+			</div>
 		</div>
 	</header><!-- #masthead -->
 
 	<div class="main-content">
-
-		<?php if ( is_front_page() ) : // Check if current page is the homepage ?>
-			<div class="shop-main-cat-banner">
-				<div>
-					<a href="<?php echo site_url(); ?>/product-category/electronics/">
-						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/gadgets.jpg" alt="Shop gadgets">
-						<span class="button-default light-button" role="button">Electronics</span>
-					</a>
-				</div>
-				<div>
-					<a href="<?php echo site_url(); ?>/product-category/homeware/">
-						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/home.jpg" alt="Shop home">
-						<span class="button-default light-button" role="button">Home</span>
-					</a>
-				</div>
-				<div>
-					<a href="<?php echo site_url(); ?>/product-category/garden/">
-						<img src="<?php echo get_template_directory_uri(); ?>/img/shop/garden.jpg" alt="Shop garden">
-						<span class="button-default light-button" role="button">Garden</span>
-					</a>
-				</div>
-			</div>
-		<?php endif; ?>

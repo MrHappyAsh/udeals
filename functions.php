@@ -225,6 +225,7 @@ function customize_woocommerce_product_title( $title, $id ) {
  * @global WC_Product $product The current product object.
  */
 function custom_woocommerce_star_rating() {
+
     global $product;
     $average = $product->get_average_rating();
     $review_count = $product->get_review_count();
@@ -379,43 +380,187 @@ function custom_thankyou_order_received_text($text, $order) {
 }
 
 /**
- * Outputs the custom product summary.
+ * Adds a custom meta box to the WooCommerce product edit page.
+ *
+ * This function creates a meta box titled "Custom Product Fields" in the sidebar of the WooCommerce product edit page,
+ * where the store admin can input three custom fields (Custom Field 1, Custom Field 2, Custom Field 3).
+ *
+ * @since 1.0.0
+ */
+function custom_add_product_meta_box() {
+    add_meta_box(
+        'custom_product_meta_box',       // ID of the meta box
+        __('Custom Product Fields', 'woocommerce'), // Title of the meta box
+        'custom_product_meta_box_callback',  // Callback function to display the fields
+        'product',                        // Post type (in this case, product)
+        'side',                           // Where to display (side, in the sidebar)
+        'default'                            // Priority
+    );
+}
+add_action('add_meta_boxes', 'custom_add_product_meta_box');
+
+/**
+ * Callback function for the custom product meta box.
+ *
+ * This function outputs the three custom fields (Custom Field 1, Custom Field 2, Custom Field 3)
+ * inside the meta box on the WooCommerce product edit page.
+ *
+ * @since 1.0.0
+ * @param WP_Post $post The post object for the current product.
+ */
+function custom_product_meta_box_callback($post) {
+    // Nonce field for security
+    wp_nonce_field('custom_product_meta_box_nonce_action', 'custom_product_meta_box_nonce');
+
+    // Get existing values from the database
+    $custom_field_1 = get_post_meta($post->ID, '_custom_field_1', true);
+    $custom_field_2 = get_post_meta($post->ID, '_custom_field_2', true);
+    $custom_field_3 = get_post_meta($post->ID, '_custom_field_3', true);
+
+    // Display the fields
+    ?>
+    <p>
+        <label for="custom_field_1"><?php _e('Custom Field 1', 'woocommerce'); ?></label>
+        <input type="text" name="custom_field_1" id="custom_field_1" value="<?php echo esc_attr($custom_field_1); ?>" style="width:100%;" />
+    </p>
+    <p>
+        <label for="custom_field_2"><?php _e('Custom Field 2', 'woocommerce'); ?></label>
+        <input type="text" name="custom_field_2" id="custom_field_2" value="<?php echo esc_attr($custom_field_2); ?>" style="width:100%;" />
+    </p>
+    <p>
+        <label for="custom_field_3"><?php _e('Custom Field 3', 'woocommerce'); ?></label>
+        <input type="text" name="custom_field_3" id="custom_field_3" value="<?php echo esc_attr($custom_field_3); ?>" style="width:100%;" />
+    </p>
+    <?php
+}
+
+/**
+ * Saves the custom fields when the product is saved.
+ *
+ * This function ensures that the custom fields (Custom Field 1, Custom Field 2, Custom Field 3)
+ * entered in the meta box are saved when the WooCommerce product is saved or updated.
+ *
+ * @since 1.0.0
+ * @param int $post_id The ID of the post being saved.
+ */
+function custom_save_product_meta_box_data($post_id) {
+    // Check nonce for security
+    if (!isset($_POST['custom_product_meta_box_nonce']) || !wp_verify_nonce($_POST['custom_product_meta_box_nonce'], 'custom_product_meta_box_nonce_action')) {
+        return;
+    }
+
+    // Check if this is an autosave, if so, don't save
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    // Check if the user has permission to edit the product
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    // Save custom field 1
+    if (isset($_POST['custom_field_1'])) {
+        update_post_meta($post_id, '_custom_field_1', sanitize_text_field($_POST['custom_field_1']));
+    }
+
+    // Save custom field 2
+    if (isset($_POST['custom_field_2'])) {
+        update_post_meta($post_id, '_custom_field_2', sanitize_text_field($_POST['custom_field_2']));
+    }
+
+    // Save custom field 3
+    if (isset($_POST['custom_field_3'])) {
+        update_post_meta($post_id, '_custom_field_3', sanitize_text_field($_POST['custom_field_3']));
+    }
+}
+add_action('save_post', 'custom_save_product_meta_box_data');
+
+/**
+ * Displays the custom fields on the single product page.
+ *
+ * This function pulls the saved values for Custom Field 1, Custom Field 2, and Custom Field 3
+ * and displays them on the single product page, below the product summary.
+ *
+ * @since 1.0.0
+ */
+function custom_display_product_fields() {
+    global $post;
+
+    // Get custom field values
+    $custom_field_1 = get_post_meta($post->ID, '_custom_field_1', true);
+    $custom_field_2 = get_post_meta($post->ID, '_custom_field_2', true);
+    $custom_field_3 = get_post_meta($post->ID, '_custom_field_3', true);
+
+    // Display the custom fields if they are not empty
+    if (!empty($custom_field_1) || !empty($custom_field_2) || !empty($custom_field_3)) {
+        echo '<div class="custom_product_fields">';
+        if (!empty($custom_field_1)) {
+            echo '<p><img src="' . get_stylesheet_directory_uri() . '/img/icons/check-circle.svg"> ' . esc_html($custom_field_1) . '</p>';
+        }
+        if (!empty($custom_field_2)) {
+            echo '<p><img src="' . get_stylesheet_directory_uri() . '/img/icons/check-circle.svg"> ' . esc_html($custom_field_2) . '</p>';
+        }
+        if (!empty($custom_field_3)) {
+            echo '<p><img src="' . get_stylesheet_directory_uri() . '/img/icons/check-circle.svg"> ' . esc_html($custom_field_3) . '</p>';
+        }
+        echo '</div>';
+    }
+}
+
+/**
+ * Outputs the standard product labels (Free Shipping, Secure Payment, Money Back Guarantee).
+ *
+ * This function displays a set of standard product labels (Free Shipping, Secure Payment, Money Back Guarantee)
+ * on the single product page, alongside other product details.
+ *
+ * @since 1.0.0
+ */
+function output_usp_standard() {
+    echo '<div class="custom_product_labels">';
+        echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/delivery-3.svg" alt="Fast & Free Delivery" />Fast & Free<br>Shipping</div>';
+        echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/shield.svg" alt="Safe & Secure payments" />Safe & Secure<br>Payment</div>';
+        echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/guarantee-2.svg" alt="Money back Guarantee" />Money Back<br>Guarantee</div>';
+    echo "</div>";
+}
+
+function custom_summary_block() {
+			woocommerce_template_single_title(); // Product Title
+            custom_woocommerce_star_rating(); // Rating
+            woocommerce_template_single_price(); // Price
+            custom_display_product_fields(); // Custom fields
+            woocommerce_template_single_add_to_cart(); // Add to Cart button
+			woocommerce_template_single_excerpt(); // Product excerpt
+            ue_kit_list_icon(); // Custom icon
+			output_usp_standard(); // Product labels
+            woocommerce_template_single_sharing(); // Sharing buttons
+}
+
+/**
+ * Custom output for the product summary on the single product page.
+ *
+ * This function outputs a custom product summary section on the single product page, including:
+ * - Product title
+ * - Star rating
+ * - Price
+ * - Custom fields (Custom Field 1, 2, and 3)
+ * - Add to cart button
+ * - Product labels (Free Shipping, Secure Payment, etc.)
+ * - Product excerpt
+ * - Social sharing buttons
+ *
+ * @since 1.0.0
  */
 function custom_output_product_summary() {
-	if (is_product()) {
-		echo '<div class="summary_block summary_block--desktop">';
-			echo '<div class="summary_block_inners">';
+    if (is_product()) {
+        echo '<div class="summary_block--desktop">';
+            echo '<div class="summary_block_inners">';
 
-				// Output the title of the product.
-				woocommerce_template_single_title(); // Product Title
+				custom_summary_block();
 
-				// Display the product rating, such as star ratings from customer reviews.
-				custom_woocommerce_star_rating(); // Rating
-
-				// Display the product price.
-				woocommerce_template_single_price(); // Price
-
-				// Show the product excerpt or description.
-				woocommerce_template_single_excerpt(); // Excerpt or Description
-
-				echo '<div class="custom_product_labels">';
-					echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/delivery.svg" alt="Free Delivery" /> Fast & Free Shipping</div>';
-					echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/safe.svg" alt="Safe payments" /> Safe & Secure Payment</div>';
-					echo '<div class="custom_product_label"><img src="' . get_stylesheet_directory_uri() . '/img/icons/guarantee.svg" alt="Money back Guarantee" /> Money Back Guarantee</div>';
-				echo "</div>";	
-
-				// Add to Cart button.
-				woocommerce_template_single_add_to_cart(); // Add to Cart button
-
-				// Display meta information like categories and tags.
-				//woocommerce_template_single_meta(); // Meta information
-
-				// Social sharing buttons.
-				woocommerce_template_single_sharing(); // Sharing buttons
-
-			echo '</div>';
-		echo '</div>';
-	}
+            echo '</div>';
+        echo '</div>';
+    }
 }
 
 /**
@@ -425,19 +570,7 @@ function custom_output_product_summary_mobile() {
 	echo '<div class="summary_block--mobile">';
 		echo '<div class="summary_block_mobile">';
 
-			woocommerce_template_single_title(); // Product Title
-			custom_woocommerce_star_rating(); // Rating
-			woocommerce_template_single_price(); // Price
-			woocommerce_template_single_excerpt(); // Excerpt or Description
-
-			echo '<div class="custom_product_labels">';
-				echo '<div class="custom_product_label"><img src="' . esc_url( get_stylesheet_directory_uri() . '/img/icons/delivery.svg' ) . '" alt="Free Delivery" /> Fast & Free Shipping</div>';
-				echo '<div class="custom_product_label"><img src="' . esc_url( get_stylesheet_directory_uri() . '/img/icons/hot.svg' ) . '" alt="Selling fast" /> Selling Fast, Last Few Remaining</div>';
-				echo '<div class="custom_product_label"><img src="' . esc_url( get_stylesheet_directory_uri() . '/img/icons/safe.svg' ) . '" alt="Safe payments" /> Safe & Secure Payment</div>';
-			echo '</div>';
-
-			woocommerce_template_single_add_to_cart(); // Add to Cart button
-			woocommerce_template_single_sharing(); // Sharing buttons
+			custom_summary_block();
 
 		echo '</div>';
 	echo '</div>';
@@ -462,25 +595,34 @@ function custom_remove_product_summary() {
 }
 add_action('init', 'custom_remove_product_summary');
 
-/**
- * Adds a custom summary after the main content in WooCommerce.
- *
- * This function hooks into the 'woocommerce_after_main_content' action and calls the 'custom_output_product_summary' function with a priority of 20.
- *
- * @since 1.0.0
- */
-function custom_add_summary_after_main_content() {
-	add_action('woocommerce_after_main_content', 'custom_output_product_summary', 20);
-}
-add_action('init', 'custom_add_summary_after_main_content');
+// /**
+//  * Adds a custom summary after the main content in WooCommerce.
+//  *
+//  * This function hooks into the 'woocommerce_after_main_content' action and calls the 'custom_output_product_summary' function with a priority of 20.
+//  *
+//  * @since 1.0.0
+//  */
+// function custom_add_summary_after_main_content() {
+// 	add_action('woocommerce_after_main_content', 'custom_output_product_summary', 20);
+// }
+// add_action('init', 'custom_add_summary_after_main_content');
+
+// /**
+//  * Adds a custom summary after the product gallery in WooCommerce for mobile devices.
+//  */
+// function custom_add_summary_after_product_gallery() {
+// 	add_action('woocommerce_after_single_product_summary', 'custom_output_product_summary_mobile', 5);
+// }
+// add_action('init', 'custom_add_summary_after_product_gallery');
 
 /**
- * Adds a custom summary after the product gallery in WooCommerce for mobile devices.
+ * Adds custom actions.
  */
-function custom_add_summary_after_product_gallery() {
+function add_standard_summary() {
+	add_action('woocommerce_after_main_content', 'custom_output_product_summary', 20);
 	add_action('woocommerce_after_single_product_summary', 'custom_output_product_summary_mobile', 5);
 }
-add_action('init', 'custom_add_summary_after_product_gallery');
+add_action('wp', 'add_standard_summary');
 
 /**
  * Adds a custom buy now bar after the single product in WooCommerce.
@@ -512,12 +654,12 @@ function add_custom_buy_now_bar() {
     </div>
     <?php
 }
-add_action('woocommerce_after_single_product', 'add_custom_buy_now_bar');
+// add_action('woocommerce_after_single_product', 'add_custom_buy_now_bar');
 
 add_filter('wc_product_sku_enabled', '__return_false');
 
 /**
- * Adds a custom product label to WooCommerce products published within the last 6 months.
+ * Adds a custom product label to WooCommerce products published within the last 3 months.
  *
  * This function checks the publish date of the product and compares it with the current date.
  * If the product was published within the last 6 months, it adds a "New Product" label to the product.
@@ -537,12 +679,87 @@ function add_custom_product_labels() {
     // Calculate the difference in seconds
     $time_difference = $current_timestamp - $post_date_timestamp;
 
-    // Six months in seconds (approximately 6 * 30 * 24 * 60 * 60)
-    $six_months_in_seconds = 6 * 30 * 24 * 60 * 60;
+	// seven days in seconds (approximately 7 * 24 * 60 * 60)
+	$seven_days_in_seconds = 7 * 24 * 60 * 60;
 
-    // Check if the product was published within the last 6 months
-    if ($time_difference <= $six_months_in_seconds) {
+    // Check if the product was published within the last 3 months
+    if ($time_difference <= $seven_days_in_seconds) {
         echo '<span class="new-product-label">New</span>';
     }
 }
 add_action('woocommerce_before_shop_loop_item_title', 'add_custom_product_labels');
+
+function product_reviews_banner() {
+    global $product;
+
+    // Fetch product reviews
+    $args = array(
+        'post_id' => $product->get_id(),
+        'status' => 'approve',
+        'number' => 25,
+    );
+    $comments = get_comments($args);
+
+    // Check if there are comments
+    if (!empty($comments)) {
+        // Calculate the average rating
+        $average_rating = $product->get_average_rating();
+
+        // Start the wrapper with scroll arrows
+        echo '<div class="product_reviews_wrapper">';
+        echo '<button class="scroll-arrow left-arrow" onclick="scrollReviews(\'left\')">←</button>';
+        
+        // Start the scrollable product_reviews container
+        echo '<div class="product_reviews">';
+        
+        // Display the average rating with stars
+        echo '<div class="product_average_rating">';
+        
+        // Loop through to display full and half stars
+        for ($i = 1; $i <= 5; $i++) {
+            if ($average_rating >= $i) {
+                // Full star
+                echo '<img src="' . get_stylesheet_directory_uri() . '/img/icons/FullStar_36px-Gold.svg" alt="Full Star">';
+            } elseif ($average_rating >= ($i - 0.5)) {
+                // Half star
+                echo '<img src="' . get_stylesheet_directory_uri() . '/img/icons/HalfStar_36px-Gold.svg" alt="Half Star">';
+            } else {
+                // Empty star (optional, if you have an empty star icon)
+                echo '<img src="' . get_stylesheet_directory_uri() . '/img/icons/Star_36px-Gold.svg" alt="Empty Star">';
+            }
+        }
+        
+        echo '</div>'; // End average rating stars
+
+        // Display each review
+        foreach ($comments as $comment) {
+            echo '<div class="product_review box-shadow">';
+                echo '<div class="product_review_rating">';
+                    $comment_rating = get_comment_meta($comment->comment_ID, 'rating', true);
+                    
+                    // Display individual comment rating stars
+                    for ($j = 1; $j <= 5; $j++) {
+                        if ($comment_rating >= $j) {
+                            echo '<img src="' . get_stylesheet_directory_uri() . '/img/icons/FullStar_36px-Gold.svg" alt="Rating">';
+                        } elseif ($comment_rating >= ($j - 0.5)) {
+                            echo '<img src="' . get_stylesheet_directory_uri() . '/img/icons/HalfStar_36px-Gold.svg" alt="Half Rating">';
+                        } else {
+                            echo '<img src="' . get_stylesheet_directory_uri() . '/img/icons/Star_36px-Gold.svg" alt="Empty Rating">';
+                        }
+                    }
+                echo '</div>';
+                
+                // Add the review content, author, and date
+                echo '<p class="product_review_content">' . esc_html($comment->comment_content) . '</p>';
+                echo '<p class="product_review_author">' . esc_html($comment->comment_author) . '</p>';
+				echo '<p class="product_review_date">' . date_i18n('j F Y', strtotime($comment->comment_date)) . '</p>';
+            echo '</div>';
+        }
+
+        echo '</div>'; // End product_reviews container
+
+        // Right arrow button
+        echo '<button class="scroll-arrow right-arrow" onclick="scrollReviews(\'right\')">→</button>';
+        echo '</div>'; // End product_reviews_wrapper
+    }
+}

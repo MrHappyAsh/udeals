@@ -19,7 +19,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-get_header( 'shop' ); ?>
+get_header( 'shop' ); 
+
+// Array of product IDs to check
+$product_ids = array(284, 4583);
+
+// Check if the current product ID is in the array, and if so, load a custom template
+if (is_product() && in_array(get_the_ID(), $product_ids)) {
+	// Load the custom template file
+	wc_get_template_part('single-product-upods');
+} else {
+	?>
 
 	<div class="product-page content-width">
 		
@@ -61,6 +71,7 @@ get_header( 'shop' ); ?>
 	</div>
 
 <?php
+}
 get_footer( 'shop' );
 
 /* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */
